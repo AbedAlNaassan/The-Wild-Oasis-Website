@@ -13,7 +13,7 @@ const authConfig = {
     authorized({ auth, request }) {
       return !!auth?.user;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
       try {
         const existingGuest = await getGuest(user.email);
 
@@ -21,10 +21,12 @@ const authConfig = {
           await createGuest({ email: user.email, fullName: user.name });
 
         return true;
-      } catch {
-        return false;
+      } catch (err) {
+        console.error("❌ Error in signIn callback:", err);
+        return false; // This causes AccessDenied
       }
     },
+
     async session({ session, user }) {
       const guest = await getGuest(session.user.email);
       session.user.guestId = guest.id;
